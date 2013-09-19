@@ -55,7 +55,7 @@ class pyDayOneGTK:
 	def selected_new(self, widget):
 		now = datetime.datetime.utcnow()
 		theUUID = uuid.uuid4()
-		self.myUUID = re.sub('[-]', '', str(theUUID))
+		self.myUUID = re.sub('-', '', str(theUUID))
 		self.myUUID = self.myUUID.swapcase()
 		print self.myUUID
 		item = now.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -153,15 +153,38 @@ class pyDayOneGTK:
 						message.destroy()
 						gtk.main_quit()
 					dialog.destroy()
+			elif platform.system() == 'Linux':
+				#print "system is Linux"
+				directory = os.path.expanduser('~/Dropbox/Apps/Day One/Journal.dayone/entries/')
+				if os.path.exists(directory):
+					self.directory = directory
+				else:
+					message = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK)
+					message.set_markup("Day One entries folder not found. Please select the entries directory of Day One. It should be under Dropbox -> Apps -> Day One -> Journal.dayone -> entries")
+					response = message.run()
+					message.destroy()
+					dialog = gtk.FileChooserDialog("Choose entries directory:",action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+					response = dialog.run()
+					if response == gtk.RESPONSE_OK:
+						#print dialog.get_current_folder(), 'selected'
+						self.directory = dialog.get_current_folder()
+					elif response == gtk.RESPONSE_CANCEL:
+						#print 'Closed, no files selected'
+						message = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK)
+						message.set_markup("No folder was selected. I can't work like this!")
+						response = message.run()
+						message.destroy()
+						gtk.main_quit()
+					dialog.destroy()
 			else:
 				message = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK)
 				message.set_markup("Day One entries folder not found. Please select the entries directory of Day One. It should be under Dropbox->Apps->Day One->Journal.dayone->entries")
-				message.run()
+				#message.run()
 				dialog = gtk.FileChooserDialog("Choose entries directory:",action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
 				response = dialog.run()
 				if response == gtk.RESPONSE_OK:
 					#print dialog.get_current_folder(), 'selected'
-					self.directory = dialog.get_current_folder()
+					self.directory = dialog.get_current_folder()+'/'
 				elif response == gtk.RESPONSE_CANCEL:
 					#print 'Closed, no files selected'
 					message = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK)
@@ -207,7 +230,7 @@ class pyDayOneGTK:
 		window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		window.set_resizable(True)
 		window.connect("destroy", self.close_application)
-		window.set_title("pyDayOne - Your Day One, on Windows")
+		window.set_title("pyDayOne - Your Day One, on " + platform.system())
 		window.set_border_width(0)
 		window.set_size_request(500, 500)
 
